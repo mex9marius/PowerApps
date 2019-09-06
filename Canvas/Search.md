@@ -106,3 +106,168 @@ But the real gain here is that you have a way to Refresh your data, a search box
 So in the future, if your SharePoint Data Source gets more columns, you can easily add these to the `Concatenate` function in the `Items` property in `Gallery1`. Just make sure you separate columns with a space.
 
 Also, if you are then being asked to add a section with DropDown filters, you can again just add these to the `Concatenate` function. But in this scenario you might need to consider that additional filters would have to work regardless of whether the Search Box has text or not. So let's see how we do that.
+
+## Search with Filters (One Combo Box Filter)
+
+The following functionality will build on top of what we have built above. In most scenarios, there would be various filters that would target a Gallery and they would have to work in conjunction with your search functionality and perhaps other filters.
+
+But the base idea is this: You need to make sure that the path you take and the expressions you write are scalable. This means that if let's say your current requirement is you add a dropdown to filter your Gallery by Item Status, and later down the line your data source will expand in columns, you shouldn't have to re-write the whole expression and change strategy to add more filters to your Gallery.
+
+> You should plan your strategy in such a way that you can simply add to the existing expression rather than re-engineer the whole thing. This will save you a lot of hassle in the future, and your app will be scalable and adding functionality to it should be a breeze. Let's face it, if your expressions are not scalable, what would your client think when you would say that it takes days to add a single additional filter to a list. Or even worst, to say that you can't with the way the app was built.
+
+So let's stage this. Go back to your SharePoint List, and add a Choice Column called `Status` with the following choices: `Active`, `Draft`, `Inactive`
+
+Then go through each Item you have created in your SharePoint List, and select a different Choice in the new column for each item.
+
+Now go back to the app, go to `View`, `Data sources`, click on the 3 dots to the right of the source that links to your SharePoint List, and click `Refresh`
+
+You've now got all new data and new column in your data source. We now need to refresh our Collection used as a data source in `Gallery1`. So click on the Refresh Icon in the app.
+
+Now lets add the Status labels to the Gallery. Edit `Gallery1` and add 2 labels: One called `LBL_Status_Label` with the `Text` property set as "Label", `Fill` set as Blue, and `Color` set as White. And the other name it `LBL_Status_Value` and set its `Text` property to `ThisItem.Status.Value`. Stack these two on top of each other to match the style of the other labels.
+
+Now let's insert into the app a Combo Box Control, and place it somewhere to right side below the Refresh Icon. Name your Combo Box `CMB_Status`. Change these properties for the Combo Box as follows:
+* `IsSearchable` = `true`
+* `SelectMultiple` = `true`
+* `Items` = `Choices(Test_Search.Status)`
+
+You now have a multiselect Combo Box that has its own search box and its choices are the same choices as the Status field.
+Now let's add this to the Search soup.
+
+Before I post the full expression that goes into the `Items` property of `Gallery1` let's think about what needs to happen next:
+* We now pottentially have to deal with two a `Filter` that looks at 2 controls
+* One of the controls can also have multiple choices
+* Because we have started with an extremely simplistic case we've used an `If` statement. This will now get more complex, and while you could handle with nested `If` statements, that would get way too messy. So time to use a Switch statement.
+* We would need to cover the following scenarios:
+    * When the Search Box is Empty and the Combo Box has no selection
+    * When the Search Box is Not Empty and the Combo Box has no selection
+    * When the Search Box is Not Empty and the Combo Box has a selection
+    * When both the Search Box and the Combo Box have values
+
+To make your expression easier to read and understand you would need to use a Switch with 2 conditions and on each condition the Match_Result will be an `If` statement that will check whether your Combo Box has any selection or not. The output of each `If` statement will be as follows:
+* If the Search Box is Blank
+    * And if the Combo Box is Empty then output `COL_Search` as is
+    * If the Combo Box is Not Empty then output `COL_Search` filtered by Status. You would say `Status.Value in CMB_Status.SelectedItems.Value` as your `Filter` condition
+* If the Search Box is Not Blank
+    * And if the Combo Box is Empty then output `COL_Search` with the original `Filter` as follows: `Filter(COL_Search,TXT_Search.Text in Concatenate(Title," ",Names," ",Description))`
+    * If the Combo Box is Not Empty then output `COL_Search` with the original `Filter` and the `Filter` that looks into the Combo Box selections. You would say `Filter(COL_Search,TXT_Search.Text in Concatenate(Title," ",Names," ",Description),Status.Value in CMB_Status.SelectedItems.Value))`
+
+Below is the full expression:
+```
+Switch(
+    true,
+    IsBlank(TXT_Search.Text),
+    If(
+        CountRows(CMB_Status.SelectedItems) > 0,
+        Filter(
+            COL_Search,
+            Status.Value in CMB_Status.SelectedItems.Value
+        ),
+        COL_Search
+    ),
+    Not IsBlank(TXT_Search.Text),
+    If(
+        CountRows(CMB_Status.SelectedItems) > 0,
+        Filter(
+            COL_Search,
+            TXT_Search.Text in Concatenate(
+                Title,
+                " ",
+                Names,
+                " ",
+                Description
+            ),
+            Status.Value in CMB_Status.SelectedItems.Value
+        ),
+        Filter(
+            COL_Search,
+            TXT_Search.Text in Concatenate(
+                Title,
+                " ",
+                Names,
+                " ",
+                Description
+            )
+        )
+    )
+)
+```
+
+And that is what your app should look like at this stage:
+
+<img src="Test_Search_Filter_Image.jpg"></img>
+
+Now what if you have have one search box but more that one Combo Box filters? Not a problem, let's solve this one too.
+
+## Search with Filters (Multiple Combo Box Filters)
+
+Withouth going into too many details, here's what we're going to do.
+* We will add another Choice column in SharePoint called `Importance` with the following choices: `Normal`, `Urgent`, `Important`.
+* You will then Edit each SharePoint Item and select different choices for the new added column.
+* You will then follow the above instructions to Refresh your Data Source in PowerApps and then click on the Refresh Icon to add the new data to the Collection.
+* For the sake of saving time and effort, make a copy of the current Combo Box in the app and place it underneath. Rename the copy as `CMB_Importance`
+* Change the Items expression of the `CMB_Importance` Combo Box to this: `Choices(Test_Search.Importance)`
+
+Next here's what we want to do:
+* If we maintain the same structure for our `Switch` because of the added element of two or more filter Combo Boxes this could get ugly and way too complex
+* So instead of checking if each Combo Box is Empty in the existing `If` statement format, lets get rid of the `If` statments from our `Switch` and construct these in the `Filter` function. We still need to check if each Combo Box is Empty and output `true` so the `Filter` function evaluates further conditions, but the goal is to be able to do that using a single strategy that allows us to add/remove Combo Boxes while only adding/removing conditions from the `Filter` rather then re-writing a whole bunch of statements.
+
+Ok, so now replate the whole expression from the `Items` property in `Gallery1` with the below:
+```
+Switch(
+    true,
+    IsBlank(TXT_Search.Text),
+    Filter(
+        COL_Search,
+        If(
+            CountRows(CMB_Status.SelectedItems) > 0,
+            Status.Value in CMB_Status.SelectedItems.Value,
+            true
+        ),
+        If(
+            CountRows(CMB_Importance.SelectedItems) > 0,
+            Importance.Value in CMB_Importance.SelectedItems.Value,
+            true
+        )
+    ),
+    Not IsBlank(TXT_Search.Text),
+    Filter(
+        COL_Search,
+        TXT_Search.Text in Concatenate(
+            Title,
+            " ",
+            Names,
+            " ",
+            Description
+        ),
+        If(
+            CountRows(CMB_Status.SelectedItems) > 0,
+            Status.Value in CMB_Status.SelectedItems.Value,
+            true
+        ),
+        If(
+            CountRows(CMB_Importance.SelectedItems) > 0,
+            Importance.Value in CMB_Importance.SelectedItems.Value,
+            true
+        )
+    )
+)
+```
+
+> Before I explain the above, I want to clear the air around why I have NOT used `IsEmpty` to evaluate whether a Combo Box has a selection or not. Well, very simple. `IsEmpty` doen't work very well on Multiselect Combo Box with `IsSearchable` = `true`. Using `CountRows` proved to work every time, hence I use it instead of `IsEmpty`
+
+Now using the above approach, when adding more Combo Boxes to the soup, you can just append additional `If` statments using the below format to each `Filter` function criteria of each of the two `Switch` conditions:
+```
+        If(
+            CountRows(<YOUR-COMBOBOX-NAME>.SelectedItems) > 0,
+            <YOUR-NEWCHOICECOLUMN-NAME>.Value in <YOUR-COMBOBOX-NAME>.SelectedItems.Value,
+            true
+        )
+```
+
+This will not only keep your code robust, but easy to read and understand by other App Makers.
+
+Your app should now look like the below:
+<img src="Test_Search_Filter_Multiple_Image.jpg"></img>
+
+
+
