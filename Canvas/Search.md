@@ -96,7 +96,7 @@ Change the Text of the following labels to the following static text values:
 
 Stack the actual labels on top of the dynamic data labels so your app looks at least close to the below:
 
-<img src="Test_Search_Image.jpg"></img>
+<img src="Test_Search_Image.jpg">
 
 
 Now try the Search Box. If you have followed the instructions correctly, the Gallery should filter results out as you type. The Search sould also look into all 3 fields. And guess what, because we have used a Collection, your App Checker is a happy chap with no errors or Delegation warnings.
@@ -194,7 +194,7 @@ Switch(
 
 And that is what your app should look like at this stage:
 
-<img src="Test_Search_Filter_Image.jpg"></img>
+<img src="Test_Search_Filter_Image.jpg">
 
 Now what if you have have one search box but more that one Combo Box filters? Not a problem, let's solve this one too.
 
@@ -267,7 +267,7 @@ Now using the above approach, when adding more Combo Boxes to the soup, you can 
 This will not only keep your code robust, but easy to read and understand by other App Makers.
 
 Your app should now look like the below:
-<img src="Test_Search_Filter_Multiple_Image.jpg"></img>
+<img src="Test_Search_Filter_Multiple_Image.jpg">
 
 
 
