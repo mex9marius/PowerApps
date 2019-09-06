@@ -2,7 +2,7 @@
 
 I've decided to put up this free public repository to share some of my knowledge around the Power Platform with all the comunity members out there.
 
-## What can I find here?
+## What can you find here?
 I will be posting advanced topics about common practice, how to do's, and also respond to queries coming from users all accross the world really.
 
 ## Who is the author?

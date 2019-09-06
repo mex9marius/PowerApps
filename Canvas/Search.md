@@ -134,7 +134,7 @@ You now have a multiselect Combo Box that has its own search box and its choices
 Now let's add this to the Search soup.
 
 Before I post the full expression that goes into the `Items` property of `Gallery1` let's think about what needs to happen next:
-* We now pottentially have to deal with two a `Filter` that looks at 2 controls
+* We now pottentially have to deal with two `Filter` that looks at 2 controls
 * One of the controls can also have multiple choices
 * Because we have started with an extremely simplistic case we've used an `If` statement. This will now get more complex, and while you could handle with nested `If` statements, that would get way too messy. So time to use a Switch statement.
 * We would need to cover the following scenarios:
@@ -196,7 +196,7 @@ And that is what your app should look like at this stage:
 
 <img src="Test_Search_Filter_Image.jpg">
 
-Now what if you have have one search box but more that one Combo Box filters? Not a problem, let's solve this one too.
+Now what if you have one search box but more that one Combo Box filters? Not a problem, let's solve this one too.
 
 ## Search with Filters (Multiple Combo Box Filters)
 
