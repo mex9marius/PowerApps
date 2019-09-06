@@ -2,9 +2,10 @@
 
 I've decided to put up this free public repository to share some of my knowledge around the Power Platform with all the comunity members out there.
 
-## What can you find here?
-I will be posting advanced topics about common practice, how to do's, and also respond to queries coming from users all accross the world really.
-
+## Topics
+|Canvas Apps|
+|:-----------:|
+|[Search Box with Multiple Combo Box Filters](https://mex9marius.github.io/PowerApps/Canvas/Search "The Canvas App Search box")|
 ## Who is the author?
 My name is Marius, I am originaly from Romania, but been living in the UK for several years now.
 Been working with Microsoft technologies in various Enterprise environments for a couple of years now, and solved some of the most complex business problems for Nissan, Heathrow Airport, Home Group, and many other local companies.
